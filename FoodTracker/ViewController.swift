@@ -13,12 +13,14 @@ class ViewController: UIViewController, UITextFieldDelegate, UIImagePickerContro
     @IBOutlet weak var nameTextField: UITextField!
     @IBOutlet weak var mealNameLabel: UILabel!
     @IBOutlet weak var photoImageView: UIImageView!
+    @IBOutlet weak var ratingControl: RatingControl!
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
         // Handle the text field's user input through delegate callbacks
-        nameTextField.delegate = self // `self` refers to the ViewController class, because it's referenced  insid ehte scope of the ViewController class definition
+        // `self` refers to the ViewController class, because it's referenced inside the scope of the ViewController class definition
+        nameTextField.delegate = self
     }
 
     // MARK: UITextFieldDelegate
@@ -40,8 +42,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIImagePickerContro
     
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
         // The info dictionary may contain multiple representations of the image. You want to use the original
-        guard let selectedImage = info[UIImagePickerController.InfoKey.originalImage] as?
-            UIImage else {
+        guard let selectedImage = info[UIImagePickerController.InfoKey.originalImage] as? UIImage else {
                 fatalError("Expected a dictionary containing an image, but was provided the following: \(info)")
         }
         
@@ -66,9 +67,5 @@ class ViewController: UIViewController, UITextFieldDelegate, UIImagePickerContro
         // Ensure ViewController is notified when the user picks an image
         imagePickerController.delegate = self
         present(imagePickerController, animated: true, completion: nil)
-    }
-    
-    @IBAction func setDefaultLabelText(_ sender: UIButton) {
-        mealNameLabel.text = "Default Text"
     }
 }
