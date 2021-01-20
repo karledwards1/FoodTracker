@@ -20,8 +20,9 @@ class MealTableViewController: UITableViewController {
         navigationItem.leftBarButtonItem = editButtonItem
         
         // Load any saved meals, otherwise load sample data
-        if let savedMeals = loadMeals() {
-            meals += savedMeals
+        let savedMeals = loadMeals()
+        if savedMeals?.count ?? 0 > 0 {
+            meals = savedMeals ?? [Meal]()
         } else {
             loadSampleMeals()
         }
@@ -155,16 +156,37 @@ class MealTableViewController: UITableViewController {
     }
     
     private func saveMeals() {
-        let isSuccessfulSave = NSKeyedArchiver.archiveRootObject(meals, toFile: Meal.ArchiveURL.path)
-        
-        if isSuccessfulSave {
+        let fullPath = getDocumentsDirectory().appendingPathComponent("meals")
+
+        do {
+            let data = try NSKeyedArchiver.archivedData(withRootObject: meals, requiringSecureCoding: false)
+            try data.write(to: fullPath)
             os_log("Meals successfully saved.", log: OSLog.default, type: .debug)
-        } else {
+        } catch {
             os_log("Failed to save meals...", log: OSLog.default, type: .error)
         }
     }
     
+    func getDocumentsDirectory() -> URL {
+        let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
+        return paths[0]
+    }
+    
     private func loadMeals() -> [Meal]? {
-        return NSKeyedUnarchiver.unarchiveObject(withFile: Meal.ArchiveURL.path) as? [Meal]
+        let fullPath = getDocumentsDirectory().appendingPathComponent("meals")
+           if let nsData = NSData(contentsOf: fullPath) {
+               do {
+
+                   let data = Data(referencing:nsData)
+
+                   if let loadedMeals = try NSKeyedUnarchiver.unarchiveTopLevelObjectWithData(data) as? Array<Meal> {
+                       return loadedMeals
+                   }
+               } catch {
+                   print("Couldn't read file.")
+                   return nil
+               }
+           }
+        return nil
     }
 }
